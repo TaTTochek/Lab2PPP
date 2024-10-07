@@ -21,13 +21,11 @@ bool isValidNumber(const string& input, int length) {
 
     // Проверяем, что каждая часть строки состоит из цифр
     for (char c : input) {
-        if (!isdigit(c)) {  // Проверяем, является ли символ цифрой
+        if (!isdigit(c)) {
             cout << "Ошибка: ввод должен состоять только из цифр.\n";
             return false;
         }
     }
-
-    // Если все проверки пройдены
     return true;
 }
 
@@ -142,7 +140,6 @@ public:
 
     // Метод для регистрации пассажира и покупки билета
     void registerPurchase(int sr, int nm, string name, string secname, string destination) {
-        // Поиск пассажира
         Passenger* passenger = findPassenger(sr, nm);
         if (passenger == nullptr) {
             // Если пассажир не найден, создаем нового
@@ -150,7 +147,7 @@ public:
             passenger = &passengers.back();
         }
 
-        // Поиск тарифа по направлению
+        // Поиск тарифа
         Tariff* tariff = findTariff(destination);
         if (tariff != nullptr) {
             passenger->addTicket(*tariff);
@@ -209,6 +206,9 @@ public:
             cout << "Пассажир с паспортом " << sr << " " << nm << " не найден.\n";
         }
     }
+    vector<Tariff> getTarif() {
+        return tariffs;
+    }
     ~Airport() {
         tariffs.clear(); passengers.clear();
     }
@@ -218,32 +218,10 @@ Airport* Airport::instancePtsr = nullptr;
 
 int main() {
     setlocale(LC_ALL, "RU");
-    Airport* office = Airport::getInstance();
-    //Airport office;
-
-    // Добавляем тарифы
-    //office->addTariff("Москва", 5000);
-    //office->addTariff("Санкт-Петербург", 4500);
-    //office->addTariff("Казань", 4000);
-
-    // Выводим список тарифов
-    office->printTariffs();
-
-    // Регистрируем покупки
-    office->registerPurchase(12, 23, "Oleg","AB123456", "Москва");
-    office->registerPurchase(12, 23, "Oleg","AB123456", "Казань");
-    office->registerPurchase(23, 12, "Vitaz`","CD789101", "Санкт-Петербург");
-
-    // Выводим информацию о пассажирах
-    office->printPassengerTickets(12, 23);
-    office->printPassengerTickets(23, 12);
-
-    // Рассчитываем общую сумму проданных билетов
-    cout << "Общая сумма проданных билетов: " << office->calculateTotalSales() << " руб.\n";
 
     string wntd;
     do {
-        cout << "Список комманд:\n1 - Добавить тариф\n2 - Вывести список тарифов\n3 - Купить билет пассажиру (Даже если пассажира нет в базе)\n4 - Вывести информацию о пассажире (По серии и номеру паспорта)\n5 - Расчитать стоимость всех купленных билетов\n6 - Завершить работу";
+        cout << "Список комманд:\n1 - Добавить тариф\n2 - Вывести список тарифов\n3 - Купить билет пассажиру (Даже если пассажира нет в базе)\n4 - Вывести информацию о пассажире (По серии и номеру паспорта)\n5 - Расчитать стоимость всех купленных билетов\n6 - Завершить работу\n";
         cout << "Введите комманду: ";
         cin >> wntd;
         cout << "\n";
@@ -253,7 +231,7 @@ int main() {
         }
         else if (wntd == "1") {
             Airport* office = Airport::getInstance();
-            string des, prc; int tup = 0; TariffType boom;
+            string des, prc; string tup; TariffType boom;
             cout << "Пункт назначения" << endl;
             cin >> des;
             do {
@@ -261,11 +239,11 @@ int main() {
                 cin >> prc;
             } while (!isNumber(prc));
             do {
-                cout << "Выберите класс (1 - эконом, 2 - бизнес, 3 - первый" << endl;
+                cout << "Выберите класс (1 - эконом, 2 - бизнес, 3 - первый)" << endl;
                 cin >> tup;
-            } while (!(tup == 1 || tup == 2 || tup == 3));
-            if (tup == 1) boom = ECONOMY;
-            else if (tup == 2) boom = BUSINESS;
+            } while (!(tup == "1" || tup == "2" || tup == "3"));
+            if (tup == "1") boom = ECONOMY;
+            else if (tup == "2") boom = BUSINESS;
             else boom = FIRST_CLASS;
             office->addTariff(des, stoi(prc), boom);
         }
@@ -275,6 +253,7 @@ int main() {
         }
         else if (wntd == "3") {
             Airport* office = Airport::getInstance();
+            if (office->getTarif().size() == 0) continue;
             string nm, snm, destin; string ser, nomer;
             do {
                 cout << "Пункт назначения" << endl;
@@ -298,9 +277,22 @@ int main() {
         }
         else if (wntd == "4") {
             Airport* office = Airport::getInstance();
+            string ser, nomer;
+            do {
+                cout << "Серию паспорта" << endl;
+                //cin.get();
+                cin >> ser;
+            } while (!isValidNumber(ser, 4));
+            do {
+                cout << "Номер паспорта" << endl;
+                //cin.get();
+                cin >> nomer;
+            } while (!isValidNumber(nomer, 6));
+            office->printPassengerTickets(stoi(ser), stoi(nomer));
         }
         else if (wntd == "5") {
             Airport* office = Airport::getInstance();
+            cout << "Общая сумма проданных билетов: " << office->calculateTotalSales() << " руб.\n";
         }
     } while (wntd != "6");
     printf("\n\n\n\tСПАСИБО ЗА ВНИМАНИЕ\n\n\n");
